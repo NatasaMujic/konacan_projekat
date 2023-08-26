@@ -32,7 +32,7 @@ try {
     $mail->Subject = 'Account Activation';
 
 // using an encoding code into link
-    $mail->Body = "Click the following link to activate your account: <a href='http://localhost:80/web_programming_project/activate.php?code=" . urlencode($encodedActivationCode) .  "'>Activate</a>";
+    $mail->Body = "Click the following link to activate your account: <a href='http://localhost/konacan_projekat-main/activate.php?code=" . urlencode($encodedActivationCode) .  "'>Activate</a>";
 
     $mail->send();
     echo "<script> alert('Account created! Please check your email to activate your account.');</script>";

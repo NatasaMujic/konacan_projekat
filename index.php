@@ -342,146 +342,37 @@
 
 
     <div class="container-fluid">
-    <div id="main">
-                    <div class="col-md-4 text-center">
-                        <br><br><br>
-                        <h1 id="titles">What's on</h1>
-                        <br><br><br>
-                        <div class="thumbnail">
-                                <img src="disney.jpg" alt="disney" style="width:100%">
-                                <div class="caption">
-                                    <h2>IMMERSIVE Disney ANIMATION</h2>
-                                    <p id="text">Surround Yourself in the Worlds, Music & Stories.</p>
-                                    <br>
-                                    <div class="detail">
-                                    <h3>When and where</h3>
-                                    <h4>Date and Time</h4>
-                                    <p>May 14, 11pm - May 15, 6am CEST</p>
-                                    <h4>Location</h4>
-                                        <p> 2732 Newton Street, Saint Cloud Minnesota </p>
-                                        <br>
-                                        <a href="reservation.php">RESERVATION</a>
-                                    </div>
-                                </div>
-                        </div>
-                    </div>
+        <div id="main">
 
-        <div class="col-md-4 text-center">
-            <br><br><br>
-            <div class="thumbnail">
-                    <img src="dino.jpg" alt="disney" style="width:100%">
-                    <div class="caption">
-                        <h2>DINO TREK</h2>
-                        <p id="text">Take a journey to the past and walk through a wooded forest alongside life-sized animatronic dinosaurus this spring and summer at DinoTrek!</p>
-                        <br>
-                        <div class="detail">
-                            <h3>When and where</h3>
-                            <h4>Date and Time</h4>
-                            <p>June 14, 11pm - June 15, 6am</p>
-                            <h4>Location</h4>
-                            <p> 52 Bridge Avenue, Merryville Louisiana </p>
+            <?php
+            include("db_functions.php");
+
+            $top_events = listTopEvents($con);
+            foreach ($top_events as $event) {
+                ?>
+
+                <div class="col-md-4 text-center">
+                    <br><br><br>
+                    <h1 id="titles"><?php echo $event->event_name; ?></h1>
+                    <br><br><br>
+                    <div class="thumbnail">
+                        <img src="./new_event_pictures/<?php echo "$event->image"; ?>" alt="event img" style="width:100%">
+                        <div class="caption">
+                            <p id="text"><?php echo $event->description; ?></p>
                             <br>
-                            <a href="reservation.php">RESERVATION</a>
+                            <div class="detail">
+                                <h3>When and where</h3>
+                                <h4>Date</h4>
+                                <p><?php echo $event->date; ?></p>
+                                <h4>Location</h4>
+                                <p><?php echo $event->address . " " . $event->city . ", " . $event->state ?></p>
+                                <br>
+                            </div>
                         </div>
                     </div>
-            </div>
-        </div>
-
-
-        <div class="col-md-4 text-center">
-            <br><br><br>
-            <h1 id="titles">Top Events</h1>
-            <br><br><br>
-            <div class="thumbnail">
-                    <img src="comedy.jpg" alt="disney" style="width:100%">
-                    <div class="caption">
-                        <h2>MUCH ADO ABOUT NOTHING</h2>
-                        <p id="text">Attending an outdoor show in the Boulder foothills can be unpredictable. Come prepared to enjoy the adventure by reviewing our weather policy and attire suggestions.</p>
-                        <br>
-                        <div class="detail">
-                            <h3>When and where</h3>
-                            <h4>Date and Time</h4>
-                            <p>June 17, 18pm - June 17, 20pm</p>
-                            <h4>Location</h4>
-                            <p> 3311 Sycamore Road, White Mountain Alaska </p>
-                            <br>
-                            <a href="reservation.php">RESERVATION</a>
-                        </div>
-                    </div>
-            </div>
-        </div>
-
-
-        <div class="col-md-4 text-center">
-            <br><br><br><br><br><br>
-            <div class="thumbnail">
-                <img src="dessert.jpg" alt="disney" style="width:100%">
-                <div class="caption">
-                    <h2>GOO GOO SHOP & DESSERT BAR CLASSES</h2>
-                    <p id="text">Visit the Goo Goo Shop & Dessert Bar for a sweet treat, a little history lesson, and the chance to make your own candy bar. Taste your way through a sample of classic Clusters or customize your own.</p>
-                    <br>
-                    <div class="detail">
-                        <h3>When and where</h3>
-                        <h4>Date and Time</h4>
-                        <p>September 3, 18pm - September 5, 20pm</p>
-                        <h4>Location</h4>
-                        <p> 2305 Brown Bear Drive, Sun City California </p>
-                        <br>
-                        <a href="reservation.php">RESERVATION</a>
-                    </div>
                 </div>
-            </div>
+            <?php } ?>
         </div>
-
-
-        <div class="col-md-4 text-center">
-            <br><br><br>
-            <h1 id="titles">AND MUCH MORE...</h1>
-            <br><br><br><br><br><br>
-            <div class="thumbnail">
-                <img src="star_wars.jpg" alt="disney" style="width:100%">
-                <div class="caption">
-                    <h2>UNOFFICIAL GALAXIES EXHIBITION</h2>
-                    <p id="text">One of the largest Star Wars private collections in the world, Unofficial Galaxies showcases iconic characters and vehicles as well as memorable scenes from the Star Wars fans world.</p>
-                    <br>
-                    <div class="detail">
-                        <h3>When and where</h3>
-                        <h4>Date and Time</h4>
-                        <p>August 17, 18pm - August 18, 20pm</p>
-                        <h4>Location</h4>
-                        <p> 1951 Pinnickinnick Street, New Brunswick New Jersey </p>
-                        <br>
-                        <a href="reservation.php">RESERVATION</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 text-center">
-            <br><br><br><br><br><br>
-            <div class="thumbnail">
-                <img src="orchestra.jpg" alt="disney" style="width:100%">
-                <div class="caption">
-                    <h2>CU AT BOETTCHER</h2>
-                    <p id="text">CU at Boettcher returns! Join CU Boulder’s choirs, CU Symphony Orchestra and faculty and alumni soloists for a spectacular free concert. The exciting program includes Carl Orff's “Carmina Burana,” the world premierer...</p>
-                    <br>
-                    <div class="detail">
-                        <h3>When and where</h3>
-                        <h4>Date and Time</h4>
-                        <p>June 17, 18pm - June 17, 20pm</p>
-                        <h4>Location</h4>
-                        <p> 1729 South Street, Midland Texas </p>
-                        <br>
-                        <a href="reservation.php">RESERVATION</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-
-
-    </div>
     </div>
     <div id="main1">
 

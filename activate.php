@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["code"])) {
         $stmt = $pdo->prepare("UPDATE registered_user SET is_active = 1, activation_code = NULL WHERE user_id = :userId");
         $stmt->execute(['userId' => $user['user_id']]);
 
-        echo "Your account has been successfully activated. You can now log in: <a href='http://localhost:80/web_programming_project/login.php?code'>Log in</a>";
+        echo "Your account has been successfully activated. You can now log in: <a href='./login.php?code'>Log in</a>";
     } else {
         echo "Invalid activation code or account is already activated. Debug info: " . print_r($stmt->errorInfo(), true);
     }

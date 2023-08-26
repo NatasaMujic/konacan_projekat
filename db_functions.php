@@ -25,3 +25,11 @@ function createNewEvent($event_name, $image, $desc, $address, $city, $state, $da
     $query->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $query->execute();
 }
+
+function listTopEvents($con)
+{
+    $sql = "SELECT event_name, image, description, address, city, state, date FROM new_event where blocked not like 1 order by id_event DESC LIMIT 6;";
+    $query = $con->prepare($sql);
+    $query->execute();
+    return $query->fetchAll(PDO::FETCH_OBJ);
+}

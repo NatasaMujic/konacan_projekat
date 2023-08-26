@@ -263,7 +263,7 @@ ini_set('display_errors', 1);
             <div class="form-row">
             <div class="form-group  col-md-6">
                 <label for="inputAllowComment">Allow comment (1-allowed, 0-not allowed)</label>
-                <input type="number" class="form-control"  id="eventAllowComment" name="eventAllowComment">
+                <input type="number" class="form-control"  id="eventAllowComment" name="eventAllowComment" max="1">
             </div>
             </div>
             <button type="submit" class="btn btn-primary">Create</button>
@@ -783,7 +783,7 @@ $pdo = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $pass
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // checking if all necessary data are entered
+    // checking if all necessary data is entered
     if (isset($_POST["firstname"]) && isset($_POST["lastname"]) && isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm_password"])) {
         $firstName = $_POST["firstname"];
         $lastName = $_POST["lastname"];
@@ -872,7 +872,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                move_uploaded_file($image_tmp, "C:/wamp64/www/web_programming_project/new_event_pictures/" . $image);
+                move_uploaded_file($image_tmp, "./new_event_pictures/" . $image);
             } else {
                 echo "Image upload failed.";
             }
@@ -887,7 +887,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $stmt->execute([
                     'eventName' => $eventName,
-                    'image' => $image_tmp,
+                    'image' => $image,
                     'shortText' => $shortText,
                     'eventAddress' => $eventAddress,
                     'eventCity' => $eventCity,
