@@ -1,3 +1,12 @@
+<?php
+session_start();
+if (!isset($_SESSION['id']) || !isset($_SESSION['f_name'])){
+    header("login.php");
+    exit();
+}else{
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,7 +19,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <title>Invitee dashboard</title>
+    <title>Admin dashboard</title>
     <style>
         *{
             font-family: 'Montserrat', sans-serif;
@@ -159,6 +168,8 @@
     </style>
 </head>
 <body>
+
+
 <div class="container-fluid">
     <div class="navigation">
         <ul>
@@ -193,7 +204,7 @@
 <div id="content1" class="content">
 
     <?php
-  session_start();
+
     //php for creating admin
     include("db_config.php");
 
@@ -255,7 +266,6 @@
             }
         }
     }else {
-        echo "You don't have permission to access this page.";
     }
     ?>
 </div>
@@ -351,10 +361,7 @@
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             // sql code for taking necessary columns from registered_user table
-            $query2 = "SELECT e.id_event, e.event_name, r.first_name, r.email, e.address, e.date, e.blocked
-                       FROM new_event AS e
-                       JOIN invitation AS i ON e.id_event = i.id_event
-                       JOIN registered_user AS r ON e.user_id = r.user_id";
+            $query2 = "SELECT e.id_event, e.event_name, e.address, e.date, e.blocked FROM new_event AS e";
             $stmt = $pdo->prepare($query2);
             $stmt->execute();
 
@@ -371,8 +378,6 @@
             echo '<tr>';
             echo '<td>Event id</td>';
             echo '<td>Event name</td>';
-            echo '<td>User name</td>';
-            echo '<td>User email</td>';
             echo '<td>Event Location</td>';
             echo '<td>Event Date</td>';
             echo '<td>Block/unblock</td>';
@@ -386,8 +391,6 @@
                 echo '<tr>';
                 echo '<td>' . $event['id_event'] . '</td>';
                 echo '<td>' . $event['event_name'] . '</td>';
-                echo '<td>' . $event['first_name'] . '</td>';
-                echo '<td>' . $event['email'].'</td>';
                 echo '<td>' . $event['address'] . '</td>';
                 echo '<td>' . $event['date'] . '</td>';
                 echo '<td>' . '<input type="number" min="0" max="1" name="blocked[' . $event['id_event'] . ']" value="' . $event['blocked'] . '">' .'<input type="submit" value="Submit" class="updateBlock">'. '</td>';

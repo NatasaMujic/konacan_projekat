@@ -21,8 +21,9 @@ if (isset($_GET['id_event'])) {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // SQL query to delete the event
-    $deleteQuery = "DELETE FROM new_event WHERE id_event = :id_event";
-    $stmt = $pdo->prepare($deleteQuery);
+    $deleteQuery = "DELETE FROM invitation WHERE id_event = :id_event; ";
+    $deleteQuery2 = "DELETE FROM new_event WHERE id_event = :id_event;";
+    $stmt = $pdo->prepare($deleteQuery . $deleteQuery2);
     $stmt->execute(['id_event' => $id_event]);
 
     header('Location: register_dashboard.php');

@@ -1,9 +1,9 @@
 <?php
 
 const DB_HOST = 'localhost';
-const DB_USER = 'root';
-const DB_PASS = '';
-const DB_NAME = 'event';
+const DB_USER = 'vb';
+const DB_PASS = 'xcnnXuz0NqjuL8I';
+const DB_NAME = 'vb';
 try {
     $con = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'"]);
 } catch (PDOException $e) {
@@ -24,4 +24,12 @@ function createNewEvent($event_name, $image, $desc, $address, $city, $state, $da
     $query->bindParam(':allow_comment', $allow_comment, PDO::PARAM_BOOL);
     $query->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $query->execute();
+}
+
+function listTopEvents($con)
+{
+    $sql = "SELECT event_name, image, description, address, city, state, date FROM new_event where blocked not like 1 order by id_event DESC LIMIT 3;";
+    $query = $con->prepare($sql);
+    $query->execute();
+    return $query->fetchAll(PDO::FETCH_OBJ);
 }

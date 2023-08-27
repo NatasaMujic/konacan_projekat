@@ -26,7 +26,7 @@ try {
     $mail->Port = 587;
 
     $mail->setFrom('mujicnatasa99@gmail.com', 'Global World Events');
-    $mail->addAddress('gugisinaulica@gmail.com', 'Anuska divojka');
+    $mail->addAddress('gugisinaulica@gmail.com', 'Ana');
 
     $mail->isHTML(true);
     $mail->Subject = 'Contact form';
@@ -37,7 +37,7 @@ try {
     ";
 
     if (file_exists($uploadDirectory . '/' . $filenameee)) {
-        $mail->addAttachment($uploadDirectory . '/' . $filenameee, $filenameee); // Ispravljena putanja za upload fajla
+        $mail->addAttachment($uploadDirectory . '/' . $filenameee, $filenameee);
     } else {
         echo "Attachment file not found.";
     }

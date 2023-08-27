@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <div class="form-group  col-md-6">
             <label for="inputAllowComment">Allow comment</label>
-            <input type="number" class="form-control"  id="eventAllowComment" name="eventAllowComment" value="<?php echo isset($event['allow_comments']) ? $event['allow_comments'] : ''; ?>">
+            <input type="number" class="form-control"  id="eventAllowComment" name="eventAllowComment" value="<?php echo isset($event['allow_comments']) ? $event['allow_comments'] : ''; ?>" max="1" min="0">
         </div>
         <button type="submit" class="btn btn-primary">Update</button>
     </div>

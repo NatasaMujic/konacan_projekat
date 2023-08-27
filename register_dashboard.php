@@ -3,7 +3,7 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -157,7 +157,139 @@ ini_set('display_errors', 1);
     </style>
 </head>
 <body>
+<?php
+//php for creating registered user
+include("db_config.php");
 
+$host = 'localhost';
+$db_name = 'vb';
+$username = 'vb';
+$password = 'xcnnXuz0NqjuL8I';
+
+$pdo = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $password);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // checking if all necessary data is entered
+    if (isset($_POST["firstname"]) && isset($_POST["lastname"]) && isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm_password"])) {
+        $firstName = $_POST["firstname"];
+        $lastName = $_POST["lastname"];
+        $orgName = $_POST["orgname"];
+        $email = $_POST["email"];
+        $user_password = $_POST["password"];
+        $confirmPassword = $_POST["confirm_password"];
+
+        if (empty($firstName) || empty($lastName) || empty($email) || empty($user_password) || empty($confirmPassword)) {
+            echo "All fields required!";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo "Email is not valid!";
+        } elseif ($user_password !== $confirmPassword) {
+            echo "Passwords do not match!";
+        } else {
+            // Check if user already exists in the database
+            $stmt = $pdo->prepare("SELECT user_id FROM registered_user WHERE email =?");
+            $stmt->execute([$email]);
+            $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
+            $existingUser = $existingUser['user_id'];
+
+            if (!empty($existingUser)) {
+                echo "User with this email already exists!";
+            } else {
+                $hashedPassword = password_hash($user_password, PASSWORD_BCRYPT);
+
+                // adding activation code
+                $activationCode = (uniqid(rand(), true));
+
+                // enter user data together with activation code
+                $stmt = $pdo->prepare("INSERT INTO registered_user (first_name, last_name, organization_name, email, password, activation_code, block_user, is_active) VALUES (:firstName, :lastName, :orgName, :email, :hashedPassword, :activationCode, 0, 0)");
+                if($stmt->execute([
+                    'firstName' => $firstName,
+                    'lastName' => $lastName,
+                    'orgName' => $orgName,
+                    'email' => $email,
+                    'hashedPassword' => $hashedPassword,
+                    'activationCode' => $activationCode,
+                ])){
+
+                    // sending activation email
+                    include("send-activation-email.php");
+
+                    // get ID of registered user for making events
+                    $registeredUserId = $pdo->lastInsertId();
+                    $_SESSION['firstname'] = $firstName;
+                    $_SESSION['user_id'] = $registeredUserId;
+
+                    /* showing data on registration dashboard
+                    echo "<div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;'>";
+                    echo "<h1 style='text-align: center;'>Welcome " . $firstName . "</h1>";
+                    echo "<div style='text-align: center;'>";
+                    echo "<p>Your data:</p>";
+                    echo "<p>Name: " . $firstName . " <br>Last Name: " . $lastName . "<br>Organization Name: " . $orgName . "<br>Email: " . $email . "<br>Password: " . $user_password . "</p>";
+                    echo "</div>";*/
+                }}
+        }
+    } else {
+        //echo "Some data is not correct!";
+    }
+}
+
+//php for creating events and entering data into database
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    if (isset($_POST["eventName"]) && isset($_FILES["image"]) && isset($_POST["shortText"]) && isset($_POST["eventAddress"]) && isset($_POST["eventCity"]) && isset($_POST["eventState"]) && isset($_POST["eventDate"]) && isset($_POST["eventAllowComment"])) {
+
+        $eventName = $_POST["eventName"];
+        $image = $_FILES["image"]["name"];
+        $image_tmp = $_FILES["image"]["tmp_name"];
+        $shortText = $_POST["shortText"];
+        $eventAddress = $_POST["eventAddress"];
+        $eventCity = $_POST["eventCity"];
+        $eventState = $_POST["eventState"];
+        $eventDate = $_POST["eventDate"];
+        $eventAllowComment = $_POST["eventAllowComment"];
+
+        if (empty($eventName) || empty($image) || empty($shortText) || empty($eventAddress) || empty($eventCity) || empty($eventState)) {
+            echo "All fields required!";
+        } else {
+
+            // creating PDO object
+            $pdo = new PDO("mysql:host=$host;dbname=$db_name", $username, $password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                move_uploaded_file($image_tmp, $_SERVER["DOCUMENT_ROOT"] . "/new_event_pictures/" . $image);
+            } else {
+                echo "Image upload failed.";
+            }
+            // check if the user is logged in
+            if (!isset($_SESSION['user_id'])) {
+                echo "User ID not found in session.";
+            } else {
+                $registeredUserId = $_SESSION['user_id'];
+
+                $stmt = $pdo->prepare("INSERT INTO new_event (event_name, image, description, address, city, state, date, allow_comments, user_id, blocked) VALUES (:eventName, :image, :shortText, :eventAddress, :eventCity, :eventState, :eventDate, :eventAllowComment, :user_id, 0)");
+
+                $stmt->execute([
+                    'eventName' => $eventName,
+                    'image' => $image,
+                    'shortText' => $shortText,
+                    'eventAddress' => $eventAddress,
+                    'eventCity' => $eventCity,
+                    'eventState' => $eventState,
+                    'eventDate' => $eventDate,
+                    'eventAllowComment' => $eventAllowComment,
+                    'user_id' => $registeredUserId
+                ]);
+                echo "<script> alert('Event successfully created!'); </script>";
+            }
+        }
+    } else {
+        //echo "Some data is not correct!";
+    }
+} else {
+    //echo "Invalid request method!";
+}
+?>
 <div class="container-fluid">
     <div class="navigation">
         <ul>
@@ -204,7 +336,6 @@ ini_set('display_errors', 1);
     </div>
 
 </div>
-
 
     <div id="content2" class="content">
         <div class="yourEvents">
@@ -263,7 +394,7 @@ ini_set('display_errors', 1);
             <div class="form-row">
             <div class="form-group  col-md-6">
                 <label for="inputAllowComment">Allow comment (1-allowed, 0-not allowed)</label>
-                <input type="number" class="form-control"  id="eventAllowComment" name="eventAllowComment">
+                <input type="number" class="form-control"  id="eventAllowComment" name="eventAllowComment" max="1">
             </div>
             </div>
             <button type="submit" class="btn btn-primary">Create</button>
@@ -276,9 +407,9 @@ ini_set('display_errors', 1);
 
                 // creating PDO object
                 $host = 'localhost';
-                $db_name = 'event';
-                $username = 'root';
-                $password = '';
+                $db_name = 'vb';
+                $username = 'vb';
+                $password = 'xcnnXuz0NqjuL8I';
 
                 $pdo = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $password);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -462,7 +593,6 @@ ini_set('display_errors', 1);
                 echo 'User is not logged in.';
             }
             ?>
-
 
                     <script>
                         //add an event listener to the select element
@@ -720,9 +850,9 @@ if (isset($_SESSION['user_id'])) {
         include("db_config.php");
 
         $host = 'localhost';
-        $db_name = 'event';
-        $username = 'root';
-        $password = '';
+        $db_name = 'vb';
+        $username = 'vb';
+        $password = 'xcnnXuz0NqjuL8I';
 
         $pdo = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $password);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -747,17 +877,17 @@ if (isset($_SESSION['user_id'])) {
                 // update user data
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-                $stmt = $pdo->prepare("UPDATE registered_user SET first_name = :firstName, last_name = :lastName, organization_name = :orgName, email = :email, password = :hashedPassword WHERE first_name = :username");
+                $stmt = $pdo->prepare("UPDATE registered_user SET first_name = :firstName, last_name = :lastName, organization_name = :orgName, email = :email, password = :hashedPassword WHERE user_id = :user_id");
                 $stmt->execute([
                     'firstName' => $firstName,
                     'lastName' => $lastName,
                     'orgName' => $orgName,
                     'email' => $email,
                     'hashedPassword' => $hashedPassword,
-                    'username' => $_SESSION["firstName"]
+                    'user_id' => $_SESSION["user_id"]
                 ]);
 
-                echo "<script> alert('Data are successfully updated!'); </script>";
+                echo "<script> alert('Data is successfully updated!'); </script>";
             }
         }
         ?>
@@ -769,148 +899,10 @@ if (isset($_SESSION['user_id'])) {
 </div>
 <div id="content1" class="content">
     <h1>Welcome registered user!</h1>
-
-<?php
-//php for creating registered user
-include("db_config.php");
-
-$host = 'localhost';
-$db_name = 'event';
-$username = 'root';
-$password = '';
-
-$pdo = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $password);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // checking if all necessary data are entered
-    if (isset($_POST["firstname"]) && isset($_POST["lastname"]) && isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm_password"])) {
-        $firstName = $_POST["firstname"];
-        $lastName = $_POST["lastname"];
-        $orgName = $_POST["orgname"];
-        $email = $_POST["email"];
-        $password = $_POST["password"];
-        $confirmPassword = $_POST["confirm_password"];
-
-        if (empty($firstName) || empty($lastName) || empty($email) || empty($password) || empty($confirmPassword)) {
-            echo "All fields required!";
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo "Email is not valid!";
-        } elseif ($password !== $confirmPassword) {
-            echo "Passwords do not match!";
-        } else {
-            // Check if user already exists in the database
-            $stmt = $pdo->prepare("SELECT * FROM registered_user WHERE email = :email");
-            $stmt->execute(['email' => $email]);
-            $existingUser = $stmt->fetch();
-
-            if ($existingUser) {
-                echo "User with this email already exists!";
-            } else {
-                $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-
-                // adding activation code
-                $activationCode = md5(uniqid(rand(), true));
-
-                // enter user data together with activation code
-                $stmt = $pdo->prepare("INSERT INTO registered_user (first_name, last_name, organization_name, email, password, activation_code) VALUES (:firstName, :lastName, :orgName, :email, :hashedPassword, :activationCode)");
-                $stmt->execute([
-                    'firstName' => $firstName,
-                    'lastName' => $lastName,
-                    'orgName' => $orgName,
-                    'email' => $email,
-                    'hashedPassword' => $hashedPassword,
-                    'activationCode' => $activationCode,
-                ]);
-
-                // sending activation email
-                include("send-activation-email.php");
-
-                // get ID of registered user for making events
-                $registeredUserId = $pdo->lastInsertId();
-                $_SESSION['firstname'] = $firstName;
-                $_SESSION['user_id'] = $registeredUserId;
-
-                // showing data on registration dashboard
-                echo "<div style='display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;'>";
-                echo "<h1 style='text-align: center;'>Welcome " . $firstName . "</h1>";
-                echo "<div style='text-align: center;'>";
-                echo "<p>Your data:</p>";
-                echo "<p>Name: " . $firstName . " <br>Last Name: " . $lastName . "<br>Organization Name: " . $orgName . "<br>Email: " . $email . "<br>Password: " . $password . "</p>";
-                echo "</div>";
-            }
-        }
-    } else {
-        echo "Some data is not correct!";
-    }
-}
-?>
 </div>
-<?php
-//php for creating events and entry data into database
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    if (isset($_POST["eventName"]) && isset($_FILES["image"]) && isset($_POST["shortText"]) && isset($_POST["eventAddress"]) && isset($_POST["eventCity"]) && isset($_POST["eventState"]) && isset($_POST["eventDate"]) && isset($_POST["eventAllowComment"])) {
-
-        $eventName = $_POST["eventName"];
-        $image = $_FILES["image"]["name"];
-        $image_tmp = $_FILES["image"]["tmp_name"];
-        $shortText = $_POST["shortText"];
-        $eventAddress = $_POST["eventAddress"];
-        $eventCity = $_POST["eventCity"];
-        $eventState = $_POST["eventState"];
-        $eventDate = $_POST["eventDate"];
-        $eventAllowComment = $_POST["eventAllowComment"];
-
-        if (empty($eventName) || empty($image) || empty($shortText) || empty($eventAddress) || empty($eventCity) || empty($eventState)) {
-            echo "All fields required!";
-        } else {
-
-            // creating PDO object
-            $pdo = new PDO("mysql:host=$host;dbname=$db_name", $username, $password);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                move_uploaded_file($image_tmp, "C:/wamp64/www/web_programming_project/new_event_pictures/" . $image);
-            } else {
-                echo "Image upload failed.";
-            }
-
-            // check if the user is logged in
-            if (!isset($_SESSION['user_id'])) {
-                echo "User ID not found in session.";
-            } else {
-                $registeredUserId = $_SESSION['user_id'];
-
-                $stmt = $pdo->prepare("INSERT INTO new_event (event_name, image, description, address, city, state, date, allow_comments, user_id) VALUES (:eventName, :image, :shortText, :eventAddress, :eventCity, :eventState, :eventDate, :eventAllowComment, :user_id)");
-
-                $stmt->execute([
-                    'eventName' => $eventName,
-                    'image' => $image_tmp,
-                    'shortText' => $shortText,
-                    'eventAddress' => $eventAddress,
-                    'eventCity' => $eventCity,
-                    'eventState' => $eventState,
-                    'eventDate' => $eventDate,
-                    'eventAllowComment' => $eventAllowComment,
-                    'user_id' => $registeredUserId
-                ]);
-
-
-                echo "Event successfully created!";
-            }
-        }
-    } else {
-        echo "Some data is not correct!";
-    }
-} else {
-    echo "Invalid request method!";
-}
-?>
 <!--JavaScript for dashboard links-->
 <script>
-
   var links = document.getElementsByClassName('link');
   for (var i = 0; i < links.length; i++) {
   links[i].addEventListener('click', function(event) {
@@ -927,9 +919,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   document.getElementById(target).style.display = 'block';
   });
 }
-
-
 </script>
 </body>
 </html>
-<?php
